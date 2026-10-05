@@ -1,0 +1,1297 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Regulación del monopolio</title>
+<style>
+
+  :root{
+    color-scheme: light;
+    --surface-1:#fcfcfb; --surface-2:#f2f1ed; --page-plane:#f9f9f7;
+    --text-primary:#0b0b0b; --text-secondary:#52514e; --text-muted:#898781;
+    --gridline:#e1e0d9; --baseline:#c3c2b7; --border:rgba(11,11,11,0.10);
+
+    --c-demand:#2a78d6;   /* demanda */
+    --c-mr:#4a3aa7;       /* ingreso marginal */
+    --c-mc:#eb6834;       /* costo marginal */
+    --c-ac:#1baf7a;       /* costo medio */
+    --c-avc:#d55181;      /* costo variable medio */
+    --c-mono:#0b0b0b;     /* punto de monopolio */
+    --c-comp:#a36b00;     /* referencia competitiva (P = CMg) */
+    --c-profit:#008300; --c-loss:#d03b3a;
+
+    --fill-cs:rgba(42,120,214,0.20);
+    --fill-ps:rgba(235,104,52,0.22);
+    --fill-ps-neg:rgba(208,59,58,0.20);
+    --fill-dwl:rgba(237,161,0,0.42);
+    --fill-tr:rgba(74,58,167,0.10);
+    --fill-tc:rgba(120,120,120,0.16);
+    --flag-bg:#fdecea; --flag-tx:#7a2b2b; --ok-bg:#e9f7ef; --ok-tx:#175c2e; --warn-bg:#fff4dc; --warn-tx:#6b4a00;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      color-scheme: dark;
+      --surface-1:#1a1a19; --surface-2:#242423; --page-plane:#0d0d0d;
+      --text-primary:#ffffff; --text-secondary:#c3c2b7; --text-muted:#898781;
+      --gridline:#2c2c2a; --baseline:#383835; --border:rgba(255,255,255,0.10);
+      --c-demand:#3987e5; --c-mr:#9085e9; --c-mc:#e8743f; --c-ac:#21b884; --c-avc:#e06a96;
+      --c-mono:#ffffff; --c-comp:#e0a526; --c-profit:#1fb31f; --c-loss:#e66767;
+      --fill-cs:rgba(57,135,229,0.28); --fill-ps:rgba(232,116,63,0.28); --fill-ps-neg:rgba(230,103,103,0.26);
+      --fill-dwl:rgba(224,165,38,0.45); --fill-tr:rgba(144,133,233,0.14); --fill-tc:rgba(200,200,200,0.12);
+      --flag-bg:#3a1f1f; --flag-tx:#f2b8b8; --ok-bg:#16301f; --ok-tx:#a9e3bd; --warn-bg:#3a2f12; --warn-tx:#f1d48f;
+    }
+  }
+  :root[data-theme="dark"]{
+    color-scheme: dark;
+    --surface-1:#1a1a19; --surface-2:#242423; --page-plane:#0d0d0d;
+    --text-primary:#ffffff; --text-secondary:#c3c2b7; --text-muted:#898781;
+    --gridline:#2c2c2a; --baseline:#383835; --border:rgba(255,255,255,0.10);
+    --c-demand:#3987e5; --c-mr:#9085e9; --c-mc:#e8743f; --c-ac:#21b884; --c-avc:#e06a96;
+    --c-mono:#ffffff; --c-comp:#e0a526; --c-profit:#1fb31f; --c-loss:#e66767;
+    --fill-cs:rgba(57,135,229,0.28); --fill-ps:rgba(232,116,63,0.28); --fill-ps-neg:rgba(230,103,103,0.26);
+    --fill-dwl:rgba(224,165,38,0.45); --fill-tr:rgba(144,133,233,0.14); --fill-tc:rgba(200,200,200,0.12);
+    --flag-bg:#3a1f1f; --flag-tx:#f2b8b8; --ok-bg:#16301f; --ok-tx:#a9e3bd; --warn-bg:#3a2f12; --warn-tx:#f1d48f;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{background:var(--page-plane);color:var(--text-primary);
+    font-family:system-ui,-apple-system,"Segoe UI",sans-serif;font-size:14px;line-height:1.5;}
+  .wrap{max-width:1400px;margin:0 auto;padding:24px 20px 56px;}
+  header h1{font-size:22px;margin:0 0 4px;}
+  header p.subtitle{margin:0 0 20px;color:var(--text-secondary);max-width:920px;}
+  .header-row{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;flex-wrap:wrap;}
+  .btn{font:inherit;padding:7px 14px;border-radius:8px;border:1px solid var(--baseline);
+    background:var(--surface-1);color:var(--text-primary);cursor:pointer;}
+  .btn:hover{background:var(--surface-2);}
+
+  .layout{display:grid;grid-template-columns:340px minmax(0,1fr);gap:18px;align-items:start;}
+  @media (max-width:1000px){ .layout{grid-template-columns:1fr;} }
+
+  .card{background:var(--surface-1);border:1px solid var(--border);border-radius:12px;padding:16px 18px;margin-bottom:18px;}
+  .card h2{font-size:15px;margin:0 0 4px;}
+  .card h3{font-size:13px;margin:14px 0 6px;color:var(--text-secondary);text-transform:uppercase;letter-spacing:.04em;}
+  .card p.hint{margin:0 0 12px;color:var(--text-secondary);font-size:12.5px;}
+
+  .field{display:flex;flex-direction:column;gap:3px;margin-bottom:10px;}
+  .field label{font-size:12px;color:var(--text-secondary);display:flex;justify-content:space-between;gap:8px;}
+  .field label .val{font-variant-numeric:tabular-nums;color:var(--text-primary);font-weight:600;}
+  .field select{font:inherit;padding:6px 8px;border-radius:8px;border:1px solid var(--baseline);
+    background:var(--surface-1);color:var(--text-primary);}
+  input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:22px;background:transparent;cursor:pointer;}
+  input[type=range]::-webkit-slider-runnable-track{height:4px;background:var(--baseline);border-radius:2px;}
+  input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:15px;height:15px;border-radius:50%;
+    background:var(--c-mr);margin-top:-5.5px;border:2px solid var(--surface-1);box-shadow:0 0 0 1px var(--baseline);}
+  input[type=range]::-moz-range-track{height:4px;background:var(--baseline);border-radius:2px;}
+  input[type=range]::-moz-range-thumb{width:15px;height:15px;border-radius:50%;background:var(--c-mr);
+    border:2px solid var(--surface-1);box-shadow:0 0 0 1px var(--baseline);}
+
+  .formula{margin-top:8px;padding:8px 11px;background:var(--surface-2);border-radius:8px;font-size:12.5px;color:var(--text-secondary);}
+  .formula b{color:var(--text-primary);}
+  .tag{display:inline-block;font-size:11px;padding:1px 8px;border-radius:10px;background:var(--surface-2);
+    color:var(--text-secondary);border:1px solid var(--border);margin-top:6px;}
+
+  .panel-head{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;flex-wrap:wrap;}
+  .zoom-controls{display:flex;align-items:center;gap:4px;}
+  .zoom-controls button{font:inherit;width:28px;height:28px;padding:0;border-radius:6px;border:1px solid var(--baseline);
+    background:var(--surface-1);color:var(--text-primary);cursor:pointer;font-size:15px;}
+  .zoom-controls button:hover{background:var(--surface-2);}
+  .zoom-controls button.wide{width:auto;padding:0 10px;font-size:11.5px;}
+  .zoom-controls .zoom-label{font-size:11px;color:var(--text-muted);min-width:42px;text-align:center;font-variant-numeric:tabular-nums;}
+
+  .toggles{display:flex;flex-wrap:wrap;gap:6px 16px;margin:6px 0 4px;font-size:12.5px;}
+  .toggles .grp{font-size:11px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.04em;width:100%;margin-top:4px;}
+  .toggles label{display:flex;align-items:center;gap:6px;cursor:pointer;color:var(--text-secondary);user-select:none;}
+  .toggles input{margin:0;accent-color:var(--text-primary);cursor:pointer;}
+  .sw{width:16px;height:3px;border-radius:2px;flex:none;}
+  .sw.area{width:13px;height:13px;border-radius:3px;}
+  .sw.hatch{width:13px;height:13px;border-radius:3px;border:1.5px solid var(--c-profit);
+    background:repeating-linear-gradient(45deg,var(--c-profit) 0 1.5px,transparent 1.5px 5px);}
+
+  canvas{display:block;width:100%;height:auto;background:var(--surface-1);border-radius:8px;touch-action:none;
+    border:1px solid var(--border);margin-top:8px;cursor:grab;}
+  canvas.dragging{cursor:grabbing;}
+  .canvas-hint{font-size:11.5px;color:var(--text-muted);margin-top:6px;}
+
+  .readout{margin-top:12px;display:grid;grid-template-columns:repeat(auto-fit,minmax(128px,1fr));gap:8px 12px;font-size:12.5px;}
+  .readout .item{background:var(--surface-2);border-radius:8px;padding:7px 10px;border-left:3px solid transparent;}
+  .readout .item .k{color:var(--text-muted);display:block;font-size:11px;margin-bottom:2px;}
+  .readout .item .v{font-variant-numeric:tabular-nums;font-weight:700;font-size:14.5px;}
+
+  .note{margin-top:10px;padding:9px 12px;border-radius:8px;font-size:12.5px;background:var(--surface-2);color:var(--text-secondary);}
+  .note.flag{background:var(--flag-bg);color:var(--flag-tx);}
+  .note.ok{background:var(--ok-bg);color:var(--ok-tx);}
+  .note.warn{background:var(--warn-bg);color:var(--warn-tx);}
+
+  table.cmp{width:100%;border-collapse:collapse;font-size:12.5px;font-variant-numeric:tabular-nums;}
+  table.cmp th,table.cmp td{padding:6px 8px;border-bottom:1px solid var(--gridline);text-align:right;}
+  table.cmp th:first-child,table.cmp td:first-child{text-align:left;color:var(--text-secondary);}
+  table.cmp thead th{color:var(--text-muted);font-weight:600;font-size:11.5px;border-bottom:1px solid var(--baseline);}
+
+  details{margin-top:4px;}
+  details summary{cursor:pointer;font-weight:600;font-size:13.5px;}
+  .deriv{font-size:13px;color:var(--text-secondary);line-height:1.7;}
+  .deriv .eq{display:block;margin:6px 0;padding:6px 10px;background:var(--surface-2);border-radius:6px;color:var(--text-primary);
+    font-family:"Cambria Math","STIX Two Math","Times New Roman",serif;font-size:14.5px;overflow-x:auto;}
+  footer{margin-top:20px;color:var(--text-muted);font-size:11.5px;line-height:1.6;}
+
+  /* --- Estilos propios del simulador de regulación --- */
+  :root{ --c-reg:#0f7c8c; --c-sub:#b8327a; --fill-sub:rgba(184,50,122,0.16); --fill-fee:rgba(15,124,140,0.14); }
+  @media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){ --c-reg:#35b8c9; --c-sub:#e475b0; --fill-sub:rgba(228,117,176,0.20); --fill-fee:rgba(53,184,201,0.18); } }
+  :root[data-theme="dark"]{ --c-reg:#35b8c9; --c-sub:#e475b0; --fill-sub:rgba(228,117,176,0.20); --fill-fee:rgba(53,184,201,0.18); }
+
+  .policies{display:flex;flex-direction:column;gap:6px;margin-bottom:12px;}
+  .policies label{display:flex;gap:9px;align-items:flex-start;padding:8px 10px;border:1px solid var(--border);border-radius:8px;
+    cursor:pointer;font-size:13px;background:var(--surface-1);}
+  .policies label:hover{background:var(--surface-2);}
+  .policies label.sel{border-color:var(--c-reg);box-shadow:inset 3px 0 0 var(--c-reg);background:var(--surface-2);}
+  .policies input{margin-top:3px;accent-color:var(--c-reg);}
+  .policies small{display:block;color:var(--text-muted);font-size:11.5px;line-height:1.35;}
+  .instr{border-top:1px dashed var(--baseline);padding-top:10px;margin-top:4px;}
+  .instr.off{opacity:.45;}
+  .btn-row{display:flex;flex-wrap:wrap;gap:6px;margin:-2px 0 10px;}
+  .btn.sm{padding:4px 9px;font-size:11.5px;}
+  .sw.hatch-sub{width:13px;height:13px;border-radius:3px;border:1.5px solid var(--c-sub);
+    background:repeating-linear-gradient(45deg,var(--c-sub) 0 1.5px,transparent 1.5px 5px);}
+  .sw.hatch-fee{width:13px;height:13px;border-radius:3px;border:1.5px solid var(--c-reg);
+    background:repeating-linear-gradient(-45deg,var(--c-reg) 0 1.5px,transparent 1.5px 5px);}
+  table.cmp tbody tr{cursor:pointer;}
+  table.cmp tbody tr:hover td{background:var(--surface-2);}
+  table.cmp tbody tr.sel td{background:var(--surface-2);font-weight:700;}
+  table.cmp tbody tr.sel td:first-child{box-shadow:inset 3px 0 0 var(--c-reg);color:var(--text-primary);}
+  .bar{position:relative;height:10px;background:var(--surface-2);border-radius:5px;min-width:70px;overflow:hidden;}
+  .bar span{position:absolute;top:0;bottom:0;left:0;background:var(--c-reg);border-radius:5px;}
+  .bar span.neg{background:var(--c-loss);}
+  .tbl-wrap{overflow-x:auto;}
+  .layout > *{min-width:0;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div class="header-row">
+      <div>
+        <h1>Regulación del monopolio</h1>
+        <p class="subtitle">
+          Evaluación comparada de políticas de regulación de un monopolista con distintas estructuras de costos:
+          precio máximo, tarificación a costo marginal con subsidio, tarificación a costo medio, tarifa en dos partes
+          y subsidio por unidad producida. Especial atención al monopolio natural (rendimientos crecientes a escala o costos fijos elevados).
+        </p>
+      </div>
+      <button class="btn" id="themeToggle" type="button">Tema oscuro</button>
+    </div>
+  </header>
+
+  <div class="layout">
+
+    <!-- ===================== COLUMNA DE CONTROLES ===================== -->
+    <aside>
+      <div class="card">
+        <h2>Política de regulación</h2>
+        <p class="hint">La política seleccionada se representa en el gráfico; la tabla inferior compara todas simultáneamente.</p>
+        <div class="policies" id="policyList"></div>
+
+        <div class="instr" id="instrCap">
+          <div class="field"><label for="Pcap">Precio máximo (P̄) <span class="val" id="Pcap-val"></span></label>
+            <input type="range" id="Pcap" min="0" max="200" step="0.5"></div>
+          <div class="btn-row">
+            <button class="btn sm" type="button" id="capPc">P̄ = Pᶜ (P = CMg)</button>
+            <button class="btn sm" type="button" id="capAc">P̄ = P<sup>CMe</sup> (autofinanciamiento)</button>
+          </div>
+        </div>
+        <div class="instr" id="instrSub">
+          <div class="field"><label for="s">Subsidio por unidad (s) <span class="val" id="s-val"></span></label>
+            <input type="range" id="s" min="0" max="150" step="0.5"></div>
+          <div class="btn-row">
+            <button class="btn sm" type="button" id="sOpt">s* = b·Qᶜ (induce Qᶜ)</button>
+          </div>
+        </div>
+        <div class="instr" id="instrLam">
+          <div class="field"><label for="lam">Costo marginal de los fondos públicos (λ) <span class="val" id="lam-val"></span></label>
+            <input type="range" id="lam" min="0" max="1" step="0.05"></div>
+          <p class="hint" style="margin:0">Cada $1 de subsidio cuesta $(1+λ) a la sociedad por las distorsiones de la tributación que lo financia.</p>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>Tecnología y costos</h2>
+        <p class="hint">Por defecto: Cobb-Douglas con rendimientos crecientes a escala y costo fijo, es decir, un monopolio natural.</p>
+        <div class="field">
+          <label for="tech">Función de producción</label>
+          <select id="tech">
+            <option value="cd_lr">Cobb-Douglas — largo plazo</option>
+            <option value="cd_sr">Cobb-Douglas — corto plazo (K fijo)</option>
+            <option value="ces_lr">CES — largo plazo</option>
+            <option value="leontief">Leontief (proporciones fijas) — largo plazo</option>
+            <option value="subs">Sustitutos perfectos — largo plazo</option>
+            <option value="cubic_sr">Cúbica — corto plazo (K fijo)</option>
+          </select>
+        </div>
+        <div id="techParams"></div>
+        <h3>Precios de los factores y costo fijo</h3>
+        <div class="field"><label for="w">Salario (w) <span class="val" id="w-val"></span></label>
+          <input type="range" id="w" min="1" max="30" step="0.5"></div>
+        <div class="field"><label for="r">Costo del capital (r) <span class="val" id="r-val"></span></label>
+          <input type="range" id="r" min="1" max="30" step="0.5"></div>
+        <div class="field"><label for="F">Costo fijo adicional (F) <span class="val" id="F-val"></span></label>
+          <input type="range" id="F" min="0" max="2000" step="10"></div>
+        <div class="formula" id="prodFormula"></div>
+        <div class="formula" id="costFormula"></div>
+        <span class="tag" id="rtsTag"></span>
+      </div>
+
+      <div class="card">
+        <h2>Demanda de mercado</h2>
+        <p class="hint">Demanda inversa lineal P(Q) = a − b·Q; ingreso marginal IMg(Q) = a − 2b·Q.</p>
+        <div class="field"><label for="a">Ordenada (a) <span class="val" id="a-val"></span></label>
+          <input type="range" id="a" min="20" max="200" step="1"></div>
+        <div class="field"><label for="b">Pendiente (b) <span class="val" id="b-val"></span></label>
+          <input type="range" id="b" min="0.2" max="5" step="0.05"></div>
+        <div class="formula" id="demandFormula"></div>
+        <div style="margin-top:12px"><button class="btn" id="resetBtn" type="button">Restablecer valores</button></div>
+      </div>
+    </aside>
+
+    <!-- ===================== COLUMNA GRÁFICA ===================== -->
+    <main>
+      <div class="card">
+        <div class="panel-head">
+          <h2 id="chartTitle">Mercado regulado</h2>
+          <div class="zoom-controls">
+            <button type="button" id="zoomOut" title="Alejar">−</button>
+            <span class="zoom-label" id="zoomLabel">100%</span>
+            <button type="button" id="zoomIn" title="Acercar">+</button>
+            <button type="button" class="wide" id="zoomFit" title="Ajuste automático">Ajustar</button>
+          </div>
+        </div>
+        <div class="toggles">
+          <span class="grp">Curvas y referencias</span>
+          <label><input type="checkbox" data-curve="d" checked><span class="sw" style="background:var(--c-demand)"></span>Demanda (D)</label>
+          <label><input type="checkbox" data-curve="mr" checked><span class="sw" style="background:var(--c-mr)"></span>Ingreso marginal (IMg)</label>
+          <label><input type="checkbox" data-curve="mc" checked><span class="sw" style="background:var(--c-mc)"></span>Costo marginal (CMg)</label>
+          <label><input type="checkbox" data-curve="ac" checked><span class="sw" style="background:var(--c-ac)"></span>Costo medio (CMe)</label>
+          <label><input type="checkbox" data-curve="avc"><span class="sw" style="background:var(--c-avc)"></span>CVMe</label>
+          <label><input type="checkbox" data-curve="mono" checked><span class="sw" style="background:var(--text-muted)"></span>Monopolio sin regular (M)</label>
+          <span class="grp">Áreas</span>
+          <label><input type="checkbox" data-area="cs" checked><span class="sw area" style="background:var(--fill-cs)"></span>Excedente del consumidor</label>
+          <label><input type="checkbox" data-area="ps" checked><span class="sw area" style="background:var(--fill-ps)"></span>Excedente del productor</label>
+          <label><input type="checkbox" data-area="dwl" checked><span class="sw area" style="background:var(--fill-dwl)"></span>Pérdida irrecuperable (PIE)</label>
+          <label><input type="checkbox" data-area="sub" checked><span class="sw hatch-sub"></span>Subsidio</label>
+          <label><input type="checkbox" data-area="fee" checked><span class="sw hatch-fee"></span>Cargo fijo (dos partes)</label>
+          <label><input type="checkbox" data-area="profit"><span class="sw hatch"></span>Beneficio / pérdida</label>
+        </div>
+        <canvas id="chart" width="1000" height="640"></canvas>
+        <div class="canvas-hint">Rueda del mouse o pellizco: zoom centrado en el cursor · Arrastrar: desplazar · Doble clic: ajuste automático.</div>
+        <div class="note" id="caseNote"></div>
+      </div>
+
+      <div class="card">
+        <h2 id="readoutTitle">Resultados de la política</h2>
+        <div class="readout" id="readout"></div>
+      </div>
+
+      <div class="card">
+        <h2>Comparación de políticas</h2>
+        <p class="hint">Bienestar social neto W = EC + π − (1+λ)·S = ∫₀<sup>Q</sup>P(q)dq − C(Q) − λ·S. La PIE se mide respecto del óptimo de primer mejor W*
+          (P = CMg financiado sin distorsiones). Hacer clic en una fila para representarla.</p>
+        <div class="tbl-wrap"><table class="cmp" id="cmpTable"></table></div>
+        <div class="note" id="rankNote"></div>
+      </div>
+
+      <div class="card">
+        <details id="derivBox">
+          <summary>Fundamentos analíticos de cada política</summary>
+          <div class="deriv" id="deriv"></div>
+        </details>
+      </div>
+    </main>
+  </div>
+
+  <footer>
+    Material desarrollado con fines exclusivamente didácticos. Los valores numéricos son ilustrativos.
+    Documento autocontenido (HTML, CSS y JavaScript en un único archivo, sin dependencias externas),
+    apto para GitHub Pages y para su enlace desde Moodle.
+  </footer>
+</div>
+
+<script>
+(function(){
+"use strict";
+
+/*MATH-START*/
+/* ============================================================
+   1. MOTOR MATEMÁTICO
+   ------------------------------------------------------------
+   Cada tecnología devuelve, para (parámetros, w, r):
+     vc(Q)  costo variable (excluye costos fijos), con vc(0)=0
+     mc(Q)  costo marginal analítico, d vc / dQ
+     sunk   costo fijo propio de la tecnología (r·K̄ en el corto plazo)
+     cap    capacidad máxima de producción (Infinity si no existe)
+   El costo total es C(Q) = sunk + F + vc(Q). Las funciones de costo
+   de largo plazo provienen de la minimización de costos
+   min wL + rK  s.a.  f(K,L) = Q  (funciones de costo duales).
+   ============================================================ */
+
+function fmt(x, d){
+  if (x===null || x===undefined || !isFinite(x)) return '—';
+  const dec = (d===undefined) ? (Math.abs(x)<10?2:1) : d;
+  return Number(x).toLocaleString('es-AR',{minimumFractionDigits:dec,maximumFractionDigits:dec});
+}
+function rtsLabel(nu){
+  if (Math.abs(nu-1)<1e-9) return 'Rendimientos constantes a escala (ν = 1)';
+  return (nu<1 ? 'Rendimientos decrecientes a escala' : 'Rendimientos crecientes a escala') + ' (ν = '+fmt(nu,2)+')';
+}
+
+const TECHS = {
+  /* Cobb-Douglas de largo plazo: Q = A·K^α·L^β, ν = α+β.
+     C(Q) = ν·(Q/A)^(1/ν)·(r/α)^(α/ν)·(w/β)^(β/ν)  ->  vc = k·Q^(1/ν) */
+  cd_lr: {
+    label:'Cobb-Douglas (largo plazo)', horizon:'lr',
+    params:[
+      {key:'A',     label:'Productividad total (A)',     min:0.5, max:3,   step:0.05, def:1},
+      {key:'alpha', label:'Elasticidad del capital (α)', min:0.1, max:0.9, step:0.05, def:0.3},
+      {key:'beta',  label:'Elasticidad del trabajo (β)', min:0.1, max:0.9, step:0.05, def:0.5}
+    ],
+    prod: p => 'Q = '+fmt(p.A)+'·K<sup>'+fmt(p.alpha)+'</sup>·L<sup>'+fmt(p.beta)+'</sup>',
+    build(p,w,r){
+      const nu = p.alpha+p.beta;
+      const k = nu*Math.pow(r/p.alpha,p.alpha/nu)*Math.pow(w/p.beta,p.beta/nu)/Math.pow(p.A,1/nu);
+      return {
+        sunk:0, cap:Infinity, nu, k,
+        vc: Q => Q<=0 ? 0 : k*Math.pow(Q,1/nu),
+        mc: Q => (k/nu)*Math.pow(Math.max(Q,1e-12),1/nu-1),
+        costTxt: 'C(Q) = F + ν·(Q/A)<sup>1/ν</sup>·(r/α)<sup>α/ν</sup>·(w/β)<sup>β/ν</sup> = F + '+fmt(k,2)+'·Q<sup>'+fmt(1/nu,3)+'</sup>',
+        rts: rtsLabel(nu)
+      };
+    }
+  },
+
+  /* Cobb-Douglas de corto plazo con K = K̄: L(Q) = (Q/(A·K̄^α))^(1/β) */
+  cd_sr: {
+    label:'Cobb-Douglas (corto plazo)', horizon:'sr',
+    params:[
+      {key:'A',     label:'Productividad total (A)',     min:0.5, max:3,   step:0.05, def:1.5},
+      {key:'alpha', label:'Elasticidad del capital (α)', min:0.1, max:0.9, step:0.05, def:0.3},
+      {key:'beta',  label:'Elasticidad del trabajo (β)', min:0.1, max:0.9, step:0.05, def:0.5},
+      {key:'K',     label:'Capital fijo (K̄)',            min:1,   max:30,  step:0.5,  def:10}
+    ],
+    prod: p => 'Q = '+fmt(p.A)+'·K̄<sup>'+fmt(p.alpha)+'</sup>·L<sup>'+fmt(p.beta)+'</sup>,  K̄ = '+fmt(p.K,1),
+    build(p,w,r){
+      const base = p.A*Math.pow(p.K,p.alpha);
+      const k = w*Math.pow(base,-1/p.beta);
+      return {
+        sunk:r*p.K, cap:Infinity, nu:null, k,
+        vc: Q => Q<=0 ? 0 : k*Math.pow(Q,1/p.beta),
+        mc: Q => (k/p.beta)*Math.pow(Math.max(Q,1e-12),1/p.beta-1),
+        costTxt: 'C(Q) = r·K̄ + F + w·(Q/(A·K̄<sup>α</sup>))<sup>1/β</sup> = '+fmt(r*p.K,1)+' + F + '+fmt(k,3)+'·Q<sup>'+fmt(1/p.beta,3)+'</sup>',
+        rts: 'Corto plazo: producto marginal del trabajo decreciente (β < 1)'
+      };
+    }
+  },
+
+  /* CES con rendimientos ν: Q = A·[α·K^ρ + (1−α)·L^ρ]^(ν/ρ), ρ = (σ−1)/σ.
+     C(Q) = c·(Q/A)^(1/ν), con c = [α^σ r^(1−σ) + (1−α)^σ w^(1−σ)]^(1/(1−σ)) */
+  ces_lr: {
+    label:'CES (largo plazo)', horizon:'lr',
+    params:[
+      {key:'A',     label:'Productividad total (A)',          min:0.5, max:3,   step:0.05, def:1},
+      {key:'alpha', label:'Peso del capital (α)',             min:0.1, max:0.9, step:0.05, def:0.4},
+      {key:'sigma', label:'Elasticidad de sustitución (σ)',   min:0.2, max:4,   step:0.05, def:0.6},
+      {key:'nu',    label:'Grado de homogeneidad (ν)',        min:0.5, max:1.5, step:0.05, def:0.9}
+    ],
+    prod: p => 'Q = '+fmt(p.A)+'·['+fmt(p.alpha)+'·K<sup>ρ</sup> + '+fmt(1-p.alpha)+'·L<sup>ρ</sup>]<sup>ν/ρ</sup>,  ρ = (σ−1)/σ = '+fmt((p.sigma-1)/p.sigma,3),
+    build(p,w,r){
+      let c;
+      if (Math.abs(p.sigma-1)<0.02){
+        c = Math.pow(r/p.alpha,p.alpha)*Math.pow(w/(1-p.alpha),1-p.alpha); // límite Cobb-Douglas
+      } else {
+        c = Math.pow(Math.pow(p.alpha,p.sigma)*Math.pow(r,1-p.sigma) + Math.pow(1-p.alpha,p.sigma)*Math.pow(w,1-p.sigma), 1/(1-p.sigma));
+      }
+      const nu = p.nu;
+      const k = c*Math.pow(p.A,-1/nu);
+      return {
+        sunk:0, cap:Infinity, nu, k,
+        vc: Q => Q<=0 ? 0 : k*Math.pow(Q,1/nu),
+        mc: Q => (k/nu)*Math.pow(Math.max(Q,1e-12),1/nu-1),
+        costTxt: 'C(Q) = F + c(w,r)·(Q/A)<sup>1/ν</sup>,  c = [α<sup>σ</sup>r<sup>1−σ</sup> + (1−α)<sup>σ</sup>w<sup>1−σ</sup>]<sup>1/(1−σ)</sup> = '+fmt(c,3)+'  ⇒  C(Q) = F + '+fmt(k,2)+'·Q<sup>'+fmt(1/nu,3)+'</sup>',
+        rts: rtsLabel(nu)
+      };
+    }
+  },
+
+  /* Leontief: Q = mín(K/vK, L/vL)  ->  C(Q) = (r·vK + w·vL)·Q */
+  leontief: {
+    label:'Leontief (largo plazo)', horizon:'lr',
+    params:[
+      {key:'vK', label:'Requerimiento unitario de K (v<sub>K</sub>)', min:0.2, max:3, step:0.05, def:1},
+      {key:'vL', label:'Requerimiento unitario de L (v<sub>L</sub>)', min:0.2, max:3, step:0.05, def:1}
+    ],
+    prod: p => 'Q = mín( K/'+fmt(p.vK)+' , L/'+fmt(p.vL)+' )',
+    build(p,w,r){
+      const c = r*p.vK + w*p.vL;
+      return {
+        sunk:0, cap:Infinity, nu:1, k:c,
+        vc: Q => Q<=0 ? 0 : c*Q,
+        mc: () => c,
+        costTxt: 'C(Q) = F + (r·v<sub>K</sub> + w·v<sub>L</sub>)·Q = F + '+fmt(c,2)+'·Q',
+        rts: rtsLabel(1)+': CMg constante'
+      };
+    }
+  },
+
+  /* Sustitutos perfectos: Q = a_K·K + a_L·L -> C(Q) = mín(r/a_K, w/a_L)·Q */
+  subs: {
+    label:'Sustitutos perfectos (largo plazo)', horizon:'lr',
+    params:[
+      {key:'aK', label:'Productividad de K (a<sub>K</sub>)', min:0.1, max:3, step:0.05, def:0.5},
+      {key:'aL', label:'Productividad de L (a<sub>L</sub>)', min:0.1, max:3, step:0.05, def:1}
+    ],
+    prod: p => 'Q = '+fmt(p.aK)+'·K + '+fmt(p.aL)+'·L',
+    build(p,w,r){
+      const cK = r/p.aK, cL = w/p.aL, c = Math.min(cK,cL);
+      const which = Math.abs(cK-cL)<1e-9 ? 'indiferente entre K y L' : (cK<cL ? 'solo capital' : 'solo trabajo');
+      return {
+        sunk:0, cap:Infinity, nu:1, k:c,
+        vc: Q => Q<=0 ? 0 : c*Q,
+        mc: () => c,
+        costTxt: 'C(Q) = F + mín(r/a<sub>K</sub>, w/a<sub>L</sub>)·Q = F + '+fmt(c,2)+'·Q  ('+which+')',
+        rts: rtsLabel(1)+': CMg constante'
+      };
+    }
+  },
+
+  /* Cúbica de corto plazo: Q = A·K̄^θ·(c1·L² − c2·L³), L ∈ [0, L̄], L̄ = 2c1/(3c2)
+     (máximo del producto total). CV(Q) = w·L(Q), con L(Q) por bisección.
+     CMg(Q) = w / PMg_L(L(Q)): en forma de U, con capacidad máxima Q(L̄). */
+  cubic_sr: {
+    label:'Cúbica (corto plazo)', horizon:'sr',
+    params:[
+      {key:'A',     label:'Productividad total (A)',      min:0.01, max:0.2,  step:0.005,  def:0.03},
+      {key:'theta', label:'Elasticidad de K̄ (θ)',          min:0.1,  max:0.9,  step:0.05,   def:0.5},
+      {key:'K',     label:'Capital fijo (K̄)',             min:1,    max:20,   step:0.5,    def:4},
+      {key:'c1',    label:'Coeficiente cuadrático (c₁)',   min:0.1,  max:1,    step:0.01,   def:0.5},
+      {key:'c2',    label:'Coeficiente cúbico (c₂)',       min:0.001,max:0.01, step:0.0005, def:0.004}
+    ],
+    prod: p => 'Q = '+fmt(p.A)+'·K̄<sup>'+fmt(p.theta)+'</sup>·('+fmt(p.c1)+'·L² − '+fmt(p.c2,3)+'·L³),  K̄ = '+fmt(p.K,1),
+    build(p,w,r){
+      const s = p.A*Math.pow(p.K,p.theta);
+      const Lbar = 2*p.c1/(3*p.c2);
+      const TP = L => s*(p.c1*L*L - p.c2*L*L*L);
+      const MP = L => s*(2*p.c1*L - 3*p.c2*L*L);
+      const cap = TP(Lbar);
+      function Linv(Q){
+        if (Q<=0) return 0;
+        if (Q>=cap) return Lbar;
+        let lo=0, hi=Lbar;
+        for (let i=0;i<70;i++){ const m=0.5*(lo+hi); if (TP(m)<Q) lo=m; else hi=m; }
+        return 0.5*(lo+hi);
+      }
+      return {
+        sunk:r*p.K, cap, nu:null, k:null, Lbar,
+        vc: Q => Q<=0 ? 0 : (Q>cap*(1+1e-12) ? Infinity : w*Linv(Q)),
+        mc: Q => { const L = Linv(Math.max(Q,1e-12)); const m = MP(L); return m>1e-12 ? w/m : Infinity; },
+        costTxt: 'C(Q) = r·K̄ + F + w·L(Q),  con L(Q) la inversa de Q(L) en [0, L̄];  L̄ = 2c₁/(3c₂) = '+fmt(Lbar,2)+',  capacidad Q̄ = '+fmt(cap,2),
+        rts: 'Corto plazo: rendimientos marginales crecientes y luego decrecientes; CMg en forma de U'
+      };
+    }
+  }
+};
+
+/* Maximización numérica robusta en [lo, hi]: barrido en grilla (global,
+   necesario cuando π(Q) no es cóncava, p.ej. con rendimientos crecientes)
+   y refinamiento por sección áurea alrededor del mejor punto. */
+function argmax(fn, lo, hi, N){
+  N = N || 2000;
+  let bestI=0, bestV=-Infinity;
+  const h = (hi-lo)/N;
+  for (let i=0;i<=N;i++){
+    const v = fn(lo+i*h);
+    if (v>bestV){ bestV=v; bestI=i; }
+  }
+  let a = lo+Math.max(bestI-1,0)*h, b = lo+Math.min(bestI+1,N)*h;
+  const g = (Math.sqrt(5)-1)/2;
+  let c = b-g*(b-a), d = a+g*(b-a), fc = fn(c), fd = fn(d);
+  for (let it=0; it<80; it++){
+    if (fc>fd){ b=d; d=c; fd=fc; c=b-g*(b-a); fc=fn(c); }
+    else { a=c; c=d; fc=fd; d=a+g*(b-a); fd=fn(d); }
+  }
+  let x = 0.5*(a+b), fx = fn(x);
+  // los extremos del intervalo pueden ser el óptimo (soluciones de esquina)
+  [lo, hi, lo+bestI*h].forEach(z=>{ const fz=fn(z); if (fz>fx){ fx=fz; x=z; } });
+  return x;
+}
+
+/* ============================================================
+   1b. POLÍTICAS DE REGULACIÓN
+   ------------------------------------------------------------
+   Cada política se resume en un "resultado" con:
+     Q    cantidad transada
+     pc   precio unitario que pagan los consumidores
+     s    subsidio por unidad que recibe la firma (pp = pc + s)
+     fee  cargo fijo total pagado por los consumidores (tarifa en dos partes)
+     lump subsidio de suma fija del Estado a la firma
+   A partir de ellos:
+     EC = ∫₀^Q P(q)dq − pc·Q − fee     (racionamiento eficiente si hay escasez)
+     π  = (pc + s)·Q + fee + lump − C(Q)
+     EP = π + CF
+     S  = s·Q + lump                    (erogación fiscal)
+     W  = EC + π − (1+λ)·S = ∫₀^Q P − C(Q) − λ·S
+   ============================================================ */
+const POLICIES = [
+  { key:'none',    label:'Sin regulación',                 short:'Monopolio' },
+  { key:'cap',     label:'Precio máximo (P̄)',               short:'Precio máximo' },
+  { key:'mcsub',   label:'P = CMg con subsidio a la pérdida', short:'P = CMg + subsidio' },
+  { key:'ac',      label:'P = CMe (autofinanciamiento)',    short:'P = CMe' },
+  { key:'twopart', label:'Tarifa en dos partes',            short:'Dos partes' },
+  { key:'unitsub', label:'Subsidio por unidad (s)',         short:'Subsidio por unidad' }
+];
+
+/* Mayor Q en (0, hi] donde g(Q) = 0, buscando desde la derecha. */
+function largestRoot(g, lo, hi){
+  const N = 4000;
+  let qPrev = hi, gPrev = g(hi);
+  for (let i=N-1;i>=0;i--){
+    const q = lo + (hi-lo)*i/N, v = g(q);
+    if (isFinite(v) && isFinite(gPrev) && ((v>=0) !== (gPrev>=0))){
+      let l=q, h=qPrev; const sl = v>=0;
+      for (let k=0;k<80;k++){ const m=0.5*(l+h); if ((g(m)>=0)===sl) l=m; else h=m; }
+      return 0.5*(l+h);
+    }
+    if (Math.abs(v) < 1e-12) return q;
+    qPrev = q; gPrev = v;
+  }
+  return null;
+}
+
+function solvePolicies(techKey, p, w, r, F, a, b, pol){
+  const def = TECHS[techKey];
+  const T = def.build(p,w,r);
+  const FC = T.sunk + F;
+  const C = Q => FC + T.vc(Q);
+  const P = Q => a - b*Q;
+  const gross = Q => a*Q - 0.5*b*Q*Q;          // ∫₀^Q P(q) dq
+  const Qd0 = a/b, Qhi = Math.min(Qd0, T.cap);
+  const outside = def.horizon==='sr' ? -FC : 0; // pago de no producir
+  const lam = pol.lambda;
+
+  // Primer mejor: P = CMg, financiado sin distorsión (λ = 0)
+  const Qe = argmax(Q => gross(Q) - T.vc(Q), 0, Qhi);
+  const Pe = P(Qe);
+  const TSe = gross(Qe) - T.vc(Qe);
+  const fbProduce = TSe - FC >= outside - 1e-9;
+  const Wstar = fbProduce ? TSe - FC : outside;
+  const ACe = Qe>0 ? C(Qe)/Qe : null;
+  const profitE = Pe*Qe - C(Qe);
+
+  function exitOutcome(key, extra){
+    return Object.assign({ key, produce:false, Q:0, pc:null, pp:null, s:0, fee:0, lump:0,
+      CS:0, profit:outside, PS:outside+FC, S:0, W:outside, DWL:Wstar-outside, shortage:0, AC:null, MC:null }, extra||{});
+  }
+  function outcome(key, Q, pc, s, fee, lump, extra){
+    const CS = gross(Q) - pc*Q - fee;
+    const profit = (pc+s)*Q + fee + lump - C(Q);
+    const S = s*Q + lump;
+    const W = CS + profit - (1+lam)*S;
+    return Object.assign({ key, produce:true, Q, pc, pp:pc+s, s, fee, lump,
+      CS, profit, PS:profit+FC, S, W, DWL:Wstar-W, shortage:0,
+      AC:C(Q)/Q, MC:T.mc(Q), MR:a-2*b*Q }, extra||{});
+  }
+
+  const res = {};
+
+  // 1. Monopolio sin regular: IMg = CMg
+  {
+    const Q = argmax(Q => P(Q)*Q - C(Q), 0, Qhi);
+    const ok = Q>1e-6 && P(Q)*Q - C(Q) >= outside - 1e-9;
+    res.none = ok ? outcome('none', Q, P(Q), 0, 0, 0) : exitOutcome('none');
+  }
+
+  // 2. Precio máximo P̄: la demanda efectiva es horizontal en P̄ hasta Q_d(P̄);
+  //    la firma maximiza mín(P̄, P(Q))·Q − C(Q).
+  {
+    const Pc = Math.max(pol.Pcap, 0);
+    const prof = Q => Math.min(Pc, P(Q))*Q - C(Q);
+    const Q = argmax(prof, 0, Qhi);
+    const ok = Q>1e-6 && prof(Q) >= outside - 1e-9 && Pc>0;
+    const QdCap = Math.max(0, (a-Pc)/b);
+    if (ok){
+      const pc = Math.min(Pc, P(Q));
+      res.cap = outcome('cap', Q, pc, 0, 0, 0, { binding: !res.none.produce || Pc < res.none.pc - 1e-9, QdCap,
+        shortage: P(Q) > Pc + 1e-9 ? Math.max(QdCap - Q, 0) : 0 });
+    } else res.cap = exitOutcome('cap', { QdCap, binding:true });
+  }
+
+  // 3. P = CMg con subsidio de suma fija que cubre la pérdida
+  {
+    if (Qe>1e-6){
+      const lump = Math.max(0, -profitE);
+      res.mcsub = outcome('mcsub', Qe, Pe, 0, 0, lump);
+    } else res.mcsub = exitOutcome('mcsub');
+  }
+
+  // 4. P = CMe: mayor Q con P(Q) = CMe(Q) (beneficio nulo, sin subsidio)
+  {
+    const g = Q => P(Q) - C(Q)/Q;
+    const Qac = largestRoot(g, Qhi*1e-5, Qhi);
+    if (Qac !== null && Qac > 1e-6) res.ac = outcome('ac', Qac, P(Qac), 0, 0, 0);
+    else res.ac = exitOutcome('ac', { noRoot:true });
+  }
+
+  // 5. Tarifa en dos partes: P = CMg y un cargo fijo total igual a la pérdida
+  //    (supuesto: ningún consumidor abandona el mercado por el cargo fijo)
+  {
+    if (Qe>1e-6){
+      const fee = Math.max(0, -profitE);
+      res.twopart = outcome('twopart', Qe, Pe, 0, fee, 0, { feeExceedsCS: fee > 0.5*b*Qe*Qe + 1e-9 });
+    } else res.twopart = exitOutcome('twopart');
+  }
+
+  // 6. Subsidio por unidad s: la firma iguala IMg + s = CMg
+  {
+    const s = Math.max(pol.s, 0);
+    const prof = Q => (P(Q)+s)*Q - C(Q);
+    const Q = argmax(prof, 0, Qhi);
+    const ok = Q>1e-6 && prof(Q) >= outside - 1e-9;
+    res.unitsub = ok ? outcome('unitsub', Q, P(Q), s, 0, 0) : exitOutcome('unitsub');
+  }
+
+  // Precio de autofinanciamiento (para el botón "P̄ = P^CMe")
+  const Pac = res.ac.produce ? res.ac.pc : null;
+
+  return { T, FC, Qd0, cap:T.cap, horizon:def.horizon, outside, lam,
+    Qe, Pe, TSe, Wstar, fbProduce, ACe, profitE, sStar: b*Qe, Pac,
+    natural: ACe!==null && Pe < ACe - 1e-9, res };
+}
+/*MATH-END*/
+
+/* ============================================================
+   2. ESTADO
+   ============================================================ */
+const DEFAULTS = { tech:'cd_lr', w:10, r:10, F:300, a:100, b:1, policy:'mcsub', Pcap:30, s:0, lambda:0.25 };
+// Parámetros por defecto propios de este simulador: rendimientos crecientes (ν = 1,2)
+const PARAM_OVERRIDES = { cd_lr:{ alpha:0.6, beta:0.6 } };
+const state = Object.assign({}, DEFAULTS, {
+  params:{},
+  curves:{ d:true, mr:true, mc:true, ac:true, avc:false, mono:true },
+  areas:{ cs:true, ps:true, dwl:true, sub:true, fee:true, profit:false },
+  view:null
+});
+function resetParams(){
+  Object.keys(TECHS).forEach(k=>{
+    const o={}; TECHS[k].params.forEach(pp=>o[pp.key]=pp.def);
+    Object.assign(o, PARAM_OVERRIDES[k]||{});
+    state.params[k]=o;
+  });
+}
+resetParams();
+
+const el = id => document.getElementById(id);
+function getVar(n){ return getComputedStyle(document.documentElement).getPropertyValue(n).trim(); }
+
+/* ============================================================
+   3. CONTROLES
+   ============================================================ */
+const DEC = { w:1, r:1, F:0, a:0, b:2, Pcap:1, s:1, lambda:2 };
+function bindSlider(id, key){
+  const inp = el(id), lab = el(id+'-val');
+  inp.value = state[key]; lab.textContent = fmt(state[key],DEC[key]);
+  inp.addEventListener('input', ()=>{ state[key]=parseFloat(inp.value); lab.textContent=fmt(state[key],DEC[key]); update(); });
+}
+function setSlider(id, key, v){
+  const inp = el(id); v = Math.min(Math.max(v, parseFloat(inp.min)), parseFloat(inp.max));
+  state[key] = v; inp.value = v; el(id+'-val').textContent = fmt(v, DEC[key]);
+}
+bindSlider('w','w'); bindSlider('r','r'); bindSlider('F','F');
+bindSlider('a','a'); bindSlider('b','b');
+bindSlider('Pcap','Pcap'); bindSlider('s','s'); bindSlider('lam','lambda');
+
+const POLICY_HINTS = {
+  none:'La firma iguala IMg = CMg y fija P sobre la demanda.',
+  cap:'El regulador fija un techo P̄; la firma elige Q tomando P̄ como dado.',
+  mcsub:'Se impone P = CMg y el Estado cubre la pérdida con un subsidio de suma fija.',
+  ac:'Se fija P = CMe: beneficio nulo sin subsidio (segundo mejor).',
+  twopart:'P = CMg más un cargo fijo que cubre la pérdida (supuesto: nadie abandona).',
+  unitsub:'Subsidio s por unidad: la firma iguala IMg + s = CMg.'
+};
+function renderPolicyList(){
+  el('policyList').innerHTML = POLICIES.map(pl =>
+    '<label class="'+(pl.key===state.policy?'sel':'')+'"><input type="radio" name="pol" value="'+pl.key+'"'+(pl.key===state.policy?' checked':'')+'>'+
+    '<span>'+pl.label+'<small>'+POLICY_HINTS[pl.key]+'</small></span></label>').join('');
+  el('policyList').querySelectorAll('input').forEach(i=>i.addEventListener('change', ()=>{ selectPolicy(i.value); }));
+}
+function selectPolicy(k){ state.policy = k; renderPolicyList(); update(); }
+renderPolicyList();
+
+el('capPc').addEventListener('click', ()=>{ if (model) { setSlider('Pcap','Pcap', Math.round(model.Pe*2)/2); selectPolicy('cap'); } });
+el('capAc').addEventListener('click', ()=>{ if (model && model.Pac!==null){ setSlider('Pcap','Pcap', Math.ceil(model.Pac*2)/2); selectPolicy('cap'); } });
+el('sOpt').addEventListener('click', ()=>{ if (model){ setSlider('s','s', Math.round(model.sStar*2)/2); selectPolicy('unitsub'); } });
+
+function renderTechParams(){
+  const box = el('techParams'); box.innerHTML='';
+  const p = state.params[state.tech];
+  TECHS[state.tech].params.forEach(pp=>{
+    const dec = pp.step<0.01 ? 3 : 2;
+    const f = document.createElement('div'); f.className='field';
+    f.innerHTML = '<label for="prm_'+pp.key+'">'+pp.label+' <span class="val" id="prm_'+pp.key+'-val">'+fmt(p[pp.key],dec)+'</span></label>'+
+      '<input type="range" id="prm_'+pp.key+'" min="'+pp.min+'" max="'+pp.max+'" step="'+pp.step+'" value="'+p[pp.key]+'">';
+    box.appendChild(f);
+    f.querySelector('input').addEventListener('input', e=>{
+      p[pp.key]=parseFloat(e.target.value);
+      el('prm_'+pp.key+'-val').textContent = fmt(p[pp.key],dec);
+      update();
+    });
+  });
+}
+el('tech').value = state.tech;
+el('tech').addEventListener('change', ()=>{ state.tech = el('tech').value; renderTechParams(); state.view=null; update(); });
+renderTechParams();
+
+document.querySelectorAll('[data-curve]').forEach(cb=>{
+  cb.checked = state.curves[cb.dataset.curve];
+  cb.addEventListener('change', ()=>{ state.curves[cb.dataset.curve]=cb.checked; draw(); });
+});
+document.querySelectorAll('[data-area]').forEach(cb=>{
+  cb.checked = state.areas[cb.dataset.area];
+  cb.addEventListener('change', ()=>{ state.areas[cb.dataset.area]=cb.checked; draw(); });
+});
+
+el('resetBtn').addEventListener('click', ()=>{
+  Object.assign(state, DEFAULTS, {view:null});
+  resetParams();
+  [['w','w'],['r','r'],['F','F'],['a','a'],['b','b'],['Pcap','Pcap'],['s','s'],['lam','lambda']].forEach(([id,k])=>setSlider(id,k,state[k]));
+  el('tech').value = state.tech; renderTechParams(); renderPolicyList(); update();
+});
+
+/* Tema claro/oscuro (preferencia recordada con localStorage protegido). */
+const mq = window.matchMedia ? window.matchMedia('(prefers-color-scheme: dark)') : null;
+let theme = (mq && mq.matches) ? 'dark' : 'light';
+try{ const sv = localStorage.getItem('monopolio-theme'); if (sv==='dark'||sv==='light'){ theme=sv; document.documentElement.setAttribute('data-theme',sv);} }catch(e){}
+function themeLabel(){ el('themeToggle').textContent = theme==='dark' ? 'Tema claro' : 'Tema oscuro'; }
+el('themeToggle').addEventListener('click', ()=>{
+  theme = theme==='dark' ? 'light' : 'dark';
+  document.documentElement.setAttribute('data-theme', theme);
+  try{ localStorage.setItem('monopolio-theme', theme); }catch(e){}
+  themeLabel(); draw();
+});
+themeLabel();
+
+/* ============================================================
+   4. ZOOM Y DESPLAZAMIENTO (idéntico al simulador de monopolio)
+   ============================================================ */
+const canvas = el('chart');
+let model = null, autoView = null, lastRect = null;
+function currentView(){ return state.view || autoView; }
+function clampView(v){
+  const W0 = autoView.x1-autoView.x0, H0 = autoView.y1-autoView.y0;
+  let w = v.x1-v.x0, h = v.y1-v.y0;
+  const cx=(v.x0+v.x1)/2, cy=(v.y0+v.y1)/2;
+  w=Math.min(Math.max(w,W0/40),W0*6); h=Math.min(Math.max(h,H0/40),H0*6);
+  return {x0:cx-w/2, x1:cx+w/2, y0:cy-h/2, y1:cy+h/2};
+}
+function zoomAt(px, py, factor){
+  const v = currentView(), R = lastRect;
+  const dx = v.x0 + (px-R.x0)/(R.x1-R.x0)*(v.x1-v.x0);
+  const dy = v.y0 + (R.y1-py)/(R.y1-R.y0)*(v.y1-v.y0);
+  state.view = clampView({ x0:dx-(dx-v.x0)*factor, x1:dx+(v.x1-dx)*factor, y0:dy-(dy-v.y0)*factor, y1:dy+(v.y1-dy)*factor });
+  draw();
+}
+function zoomCenter(f){ const R=lastRect; zoomAt((R.x0+R.x1)/2,(R.y0+R.y1)/2,f); }
+el('zoomIn').addEventListener('click', ()=>zoomCenter(0.8));
+el('zoomOut').addEventListener('click', ()=>zoomCenter(1.25));
+el('zoomFit').addEventListener('click', ()=>{ state.view=null; draw(); });
+canvas.addEventListener('dblclick', ()=>{ state.view=null; draw(); });
+function localXY(e){ const bb=canvas.getBoundingClientRect(); return [e.clientX-bb.left, e.clientY-bb.top]; }
+canvas.addEventListener('wheel', e=>{ e.preventDefault(); const [x,y]=localXY(e); zoomAt(x,y,Math.exp(e.deltaY*0.0015)); }, {passive:false});
+const pointers = new Map();
+let dragStart = null, pinchStart = null;
+canvas.addEventListener('pointerdown', e=>{
+  pointers.set(e.pointerId, localXY(e));
+  try{ canvas.setPointerCapture(e.pointerId); }catch(err){}
+  if (pointers.size===1){ dragStart = { xy:localXY(e), view:Object.assign({},currentView()) }; canvas.classList.add('dragging'); }
+  if (pointers.size===2){
+    const [p1,p2] = [...pointers.values()];
+    pinchStart = { d:Math.hypot(p1[0]-p2[0],p1[1]-p2[1]), view:Object.assign({},currentView()), mid:[(p1[0]+p2[0])/2,(p1[1]+p2[1])/2] };
+    dragStart = null;
+  }
+});
+canvas.addEventListener('pointermove', e=>{
+  if (!pointers.has(e.pointerId)) return;
+  pointers.set(e.pointerId, localXY(e));
+  const R = lastRect;
+  if (pointers.size===2 && pinchStart){
+    const [p1,p2] = [...pointers.values()];
+    const d = Math.hypot(p1[0]-p2[0],p1[1]-p2[1]); if (d<5) return;
+    const f = pinchStart.d/d, v = pinchStart.view, m = pinchStart.mid;
+    const dx = v.x0 + (m[0]-R.x0)/(R.x1-R.x0)*(v.x1-v.x0);
+    const dy = v.y0 + (R.y1-m[1])/(R.y1-R.y0)*(v.y1-v.y0);
+    state.view = clampView({ x0:dx-(dx-v.x0)*f, x1:dx+(v.x1-dx)*f, y0:dy-(dy-v.y0)*f, y1:dy+(v.y1-dy)*f });
+    draw();
+  } else if (dragStart){
+    const [x,y] = localXY(e), v = dragStart.view;
+    if (Math.abs(x-dragStart.xy[0])+Math.abs(y-dragStart.xy[1]) < 2 && !state.view) return;
+    const sx = (v.x1-v.x0)/(R.x1-R.x0), sy = (v.y1-v.y0)/(R.y1-R.y0);
+    const ddx = -(x-dragStart.xy[0])*sx, ddy = (y-dragStart.xy[1])*sy;
+    state.view = { x0:v.x0+ddx, x1:v.x1+ddx, y0:v.y0+ddy, y1:v.y1+ddy };
+    draw();
+  }
+});
+function endPointer(e){
+  pointers.delete(e.pointerId);
+  if (pointers.size<2) pinchStart=null;
+  if (pointers.size===0){ dragStart=null; canvas.classList.remove('dragging'); }
+}
+canvas.addEventListener('pointerup', endPointer);
+canvas.addEventListener('pointercancel', endPointer);
+
+/* ============================================================
+   5. DIBUJO
+   ============================================================ */
+function setupCanvas(){
+  const cssW = canvas.getBoundingClientRect().width || canvas.width;
+  const cssH = Math.max(340, Math.min(cssW*0.64, 700));
+  const dpr = window.devicePixelRatio || 1;
+  canvas.style.height = cssH+'px';
+  const tw = Math.round(cssW*dpr), th = Math.round(cssH*dpr);
+  if (canvas.width!==tw || canvas.height!==th){ canvas.width=tw; canvas.height=th; }
+  const ctx = canvas.getContext('2d');
+  ctx.setTransform(dpr,0,0,dpr,0,0);
+  return {ctx, w:cssW, h:cssH};
+}
+function niceStep(range, n){
+  const raw = range/n, mag = Math.pow(10,Math.floor(Math.log10(raw))), nr = raw/mag;
+  return (nr<1.5?1:nr<3?2:nr<7?5:10)*mag;
+}
+const FONT = '12px system-ui,-apple-system,"Segoe UI",sans-serif';
+
+function computeAutoView(m){
+  const o = m.res[state.policy];
+  const xMax = Math.max(m.Qd0, m.Qe, o.Q, isFinite(m.cap)?Math.min(m.cap,m.Qd0*1.3):0)*1.06;
+  return { x0:0, x1:xMax, y0:0, y1:state.a*1.1 };
+}
+
+function draw(){
+  if (!model) return;
+  const {ctx, w, h} = setupCanvas();
+  const R = { x0:86, y0:16, x1:w-22, y1:h-46 };
+  lastRect = R;
+  const V = currentView();
+  const X = q => R.x0 + (q-V.x0)/(V.x1-V.x0)*(R.x1-R.x0);
+  const Y = v => R.y1 - (v-V.y0)/(V.y1-V.y0)*(R.y1-R.y0);
+  const clampPx = v => Math.max(-1e5, Math.min(1e5, v));
+  const m = model, a = state.a, b = state.b, T = m.T;
+  const o = m.res[state.policy];
+  const Pd = q => a-b*q;
+  const AC = q => (m.FC + T.vc(q))/q;
+  const AVC = q => T.vc(q)/q;
+  const qMaxCost = isFinite(m.cap) ? m.cap : Infinity;
+  ctx.clearRect(0,0,w,h);
+
+  /* --- grilla y ejes --- */
+  ctx.save();
+  ctx.font = FONT; ctx.lineWidth = 1;
+  const xs = niceStep(V.x1-V.x0, 8), ys = niceStep(V.y1-V.y0, 7);
+  ctx.strokeStyle = getVar('--gridline'); ctx.fillStyle = getVar('--text-muted');
+  ctx.textAlign='right'; ctx.textBaseline='middle';
+  for (let v=Math.ceil(V.y0/ys)*ys; v<=V.y1+1e-9; v+=ys){
+    const y=Y(v); ctx.beginPath(); ctx.moveTo(R.x0,y); ctx.lineTo(R.x1,y); ctx.stroke();
+    ctx.fillText(fmt(v, ys<1?2:0), R.x0-8, y);
+  }
+  ctx.textAlign='center'; ctx.textBaseline='top';
+  for (let v=Math.ceil(V.x0/xs)*xs; v<=V.x1+1e-9; v+=xs){
+    const x=X(v); ctx.beginPath(); ctx.moveTo(x,R.y0); ctx.lineTo(x,R.y1); ctx.stroke();
+    ctx.fillText(fmt(v, xs<1?2:0), x, R.y1+6);
+  }
+  ctx.strokeStyle = getVar('--baseline'); ctx.lineWidth=1.3;
+  ctx.beginPath(); ctx.moveTo(R.x0,R.y0); ctx.lineTo(R.x0,R.y1); ctx.lineTo(R.x1,R.y1); ctx.stroke();
+  if (V.x0<0 && V.x1>0){ ctx.beginPath(); ctx.moveTo(X(0),R.y0); ctx.lineTo(X(0),R.y1); ctx.stroke(); }
+  if (V.y0<0 && V.y1>0){ ctx.beginPath(); ctx.moveTo(R.x0,Y(0)); ctx.lineTo(R.x1,Y(0)); ctx.stroke(); }
+  ctx.fillStyle = getVar('--text-secondary'); ctx.font='12.5px system-ui,-apple-system,sans-serif';
+  ctx.textAlign='center'; ctx.textBaseline='alphabetic';
+  ctx.fillText('Cantidad (Q)', (R.x0+R.x1)/2, R.y1+38);
+  ctx.save(); ctx.translate(16,(R.y0+R.y1)/2); ctx.rotate(-Math.PI/2); ctx.fillText('Precio, costos ($)',0,0); ctx.restore();
+  ctx.restore();
+
+  /* --- contenido recortado --- */
+  ctx.save();
+  ctx.beginPath(); ctx.rect(R.x0,R.y0,R.x1-R.x0,R.y1-R.y0); ctx.clip();
+  const NA = 500;
+  const yCap = V.y1 + (V.y1-V.y0)*2;
+  const cap = v => (isFinite(v) ? Math.min(v, yCap) : yCap);
+  function fillPoly(pts, color){
+    if (pts.length<3) return;
+    ctx.fillStyle = color; ctx.beginPath();
+    pts.forEach((pt,i)=>{ const x=clampPx(X(pt[0])), y=clampPx(Y(pt[1])); i?ctx.lineTo(x,y):ctx.moveTo(x,y); });
+    ctx.closePath(); ctx.fill();
+  }
+  function hatchRect(q0, q1, v0, v1, color, dir){
+    const x0=X(q0), x1=X(q1);
+    const top=Math.max(Math.min(Y(v0),Y(v1)),-1e5), bot=Math.min(Math.max(Y(v0),Y(v1)),1e5);
+    if (x1-x0<1 || bot-top<1) return;
+    ctx.save(); ctx.beginPath(); ctx.rect(x0,top,x1-x0,bot-top); ctx.clip();
+    ctx.strokeStyle=color; ctx.globalAlpha=0.5; ctx.lineWidth=1.1;
+    const H=bot-top;
+    for (let s=-H; s<(x1-x0)+H; s+=7){
+      ctx.beginPath();
+      if (dir<0){ ctx.moveTo(x0+s,top); ctx.lineTo(x0+s+H,bot); } else { ctx.moveTo(x0+s,bot); ctx.lineTo(x0+s+H,top); }
+      ctx.stroke();
+    }
+    ctx.restore();
+    ctx.save(); ctx.strokeStyle=color; ctx.lineWidth=1.6; ctx.strokeRect(x0,top,x1-x0,bot-top); ctx.restore();
+  }
+
+  if (o.produce){
+    const Q=o.Q, pc=o.pc, pp=o.pp;
+    // Excedente del consumidor: entre la demanda y el precio pagado, de 0 a Q
+    // (si hay escasez, se supone racionamiento eficiente).
+    if (state.areas.cs){
+      const poly=[[0,a]];
+      for (let i=0;i<=NA;i++){ const q=Q*i/NA; poly.push([q,Pd(q)]); }
+      poly.push([Q,pc],[0,pc]);
+      fillPoly(poly, getVar('--fill-cs'));
+    }
+    // Excedente del productor: entre el precio que recibe la firma (pc + s) y el CMg
+    if (state.areas.ps){
+      const pos=[[0,pp]], neg=[[0,pp]];
+      for (let i=0;i<=NA;i++){
+        const q=Math.max(Q*i/NA, Q*1e-4), mc=cap(T.mc(q));
+        pos.push([q,Math.min(mc,pp)]); neg.push([q,Math.max(mc,pp)]);
+      }
+      pos.push([Q,pp]); neg.push([Q,pp]);
+      fillPoly(pos, getVar('--fill-ps')); fillPoly(neg, getVar('--fill-ps-neg'));
+    }
+    // PIE: subproducción (Q < Qᶜ) o sobreproducción (Q > Qᶜ, CMg > P)
+    if (state.areas.dwl && Math.abs(Q-m.Qe) > 1e-6*Math.max(1,m.Qe)){
+      const q0=Math.min(Q,m.Qe), q1=Math.max(Q,m.Qe), poly=[];
+      for (let i=0;i<=NA;i++){ const q=q0+(q1-q0)*i/NA; poly.push([q,Pd(q)]); }
+      for (let i=NA;i>=0;i--){ const q=q0+(q1-q0)*i/NA; poly.push([q,cap(T.mc(q))]); }
+      fillPoly(poly, getVar('--fill-dwl'));
+    }
+    if (state.areas.profit && Math.abs(o.profit)>1e-9){
+      const avgRev = (o.profit + m.FC + T.vc(Q))/Q;   // ingreso medio total de la firma
+      hatchRect(0, Q, avgRev, o.AC, o.profit>=0?getVar('--c-profit'):getVar('--c-loss'), 1);
+    }
+    // Subsidio: por unidad (rectángulo s·Q) o de suma fija (pérdida cubierta)
+    if (state.areas.sub && o.S>1e-9){
+      if (o.s>0) hatchRect(0, Q, pc, pp, getVar('--c-sub'), 1);
+      else hatchRect(0, Q, pc, pc + o.lump/Q, getVar('--c-sub'), 1);
+    }
+    if (state.areas.fee && o.fee>1e-9) hatchRect(0, Q, pc, pc + o.fee/Q, getVar('--c-reg'), -1);
+  } else if (state.areas.dwl && m.fbProduce && m.Qe>0){
+    const poly=[];
+    for (let i=0;i<=NA;i++){ const q=m.Qe*i/NA; poly.push([q,Pd(q)]); }
+    for (let i=NA;i>=0;i--){ const q=Math.max(m.Qe*i/NA,1e-6); poly.push([q,cap(T.mc(q))]); }
+    fillPoly(poly, getVar('--fill-dwl'));
+  }
+
+  /* --- curvas --- */
+  function curve(fn, qLo, qHi, color, width, dash){
+    qLo = Math.max(qLo, V.x0); qHi = Math.min(qHi, V.x1);
+    if (!(qHi>qLo)) return null;
+    const N=600; ctx.save();
+    ctx.strokeStyle=color; ctx.lineWidth=width||2.6; ctx.lineJoin='round'; ctx.lineCap='round';
+    if (dash) ctx.setLineDash(dash);
+    ctx.beginPath(); let started=false, last=null;
+    for (let i=0;i<=N;i++){
+      const q = qLo+(qHi-qLo)*i/N; let v = fn(q);
+      if (!isFinite(v)){ started=false; continue; }
+      v = Math.min(Math.max(v, V.y0-(V.y1-V.y0)*2), yCap);
+      const x=X(q), y=Y(v);
+      if (!started){ ctx.moveTo(x,y); started=true; } else ctx.lineTo(x,y);
+      if (v<=V.y1 && v>=V.y0) last=[x,y];
+    }
+    ctx.stroke(); ctx.restore();
+    return last;
+  }
+  const labels=[];
+  const eps0 = Math.max(V.x1-V.x0,1)*1e-4;
+  if (state.curves.d){ const l=curve(Pd, 0, m.Qd0, getVar('--c-demand')); if(l) labels.push([l,'D','--c-demand']); }
+  if (state.curves.mr){ const l=curve(q=>a-2*b*q, 0, m.Qd0, getVar('--c-mr'), 2.2); if(l) labels.push([l,'IMg','--c-mr']); }
+  if (state.curves.avc){ const l=curve(AVC, eps0, Math.min(qMaxCost,V.x1), getVar('--c-avc'), 2, [7,4]); if(l) labels.push([l,'CVMe','--c-avc']); }
+  if (state.curves.ac){ const l=curve(AC, eps0, Math.min(qMaxCost,V.x1), getVar('--c-ac')); if(l) labels.push([l,'CMe','--c-ac']); }
+  if (state.curves.mc){ const l=curve(q=>T.mc(q), eps0, Math.min(qMaxCost,V.x1), getVar('--c-mc')); if(l) labels.push([l,'CMg','--c-mc']); }
+
+  const colReg = getVar('--c-reg'), colSub = getVar('--c-sub');
+  // Instrumentos específicos de cada política
+  if (state.policy==='cap'){
+    const Pc = state.Pcap, Qd = Math.max(0,(a-Pc)/b);
+    // Ingreso marginal efectivo con precio máximo: P̄ hasta Q_d(P̄), luego IMg
+    ctx.save(); ctx.strokeStyle=colReg; ctx.lineWidth=3; ctx.setLineDash([9,5]);
+    ctx.beginPath(); ctx.moveTo(X(0),Y(Pc)); ctx.lineTo(X(Qd),Y(Pc));
+    if (Pc < a) ctx.lineTo(X(Qd),Y(a-2*b*Qd));
+    ctx.stroke(); ctx.restore();
+    labels.push([[X(0)+4,Y(Pc)-1],'P̄ = '+fmt(Pc,1),'--c-reg']);
+    if (o.produce && o.shortage>1e-6){
+      const y=Y(Pc)+16;
+      ctx.save(); ctx.strokeStyle=colReg; ctx.fillStyle=colReg; ctx.lineWidth=1.6;
+      ctx.beginPath(); ctx.moveTo(X(o.Q),y); ctx.lineTo(X(Qd),y); ctx.stroke();
+      [[X(o.Q),1],[X(Qd),-1]].forEach(([x,d])=>{ ctx.beginPath(); ctx.moveTo(x,y); ctx.lineTo(x+7*d,y-4); ctx.lineTo(x+7*d,y+4); ctx.closePath(); ctx.fill(); });
+      ctx.restore();
+      labels.push([[ (X(o.Q)+X(Qd))/2 - 26, y+12 ], 'Escasez', '--c-reg']);
+    }
+  }
+  if (state.policy==='unitsub' && state.s>0){
+    const l = curve(q=>a-2*b*q+state.s, 0, m.Qd0, colSub, 2.2, [8,4]);
+    if (l) labels.push([l,'IMg + s','--c-sub']);
+  }
+
+  // capacidad máxima (tecnología cúbica)
+  if (isFinite(m.cap)){
+    ctx.save(); ctx.strokeStyle=getVar('--text-muted'); ctx.setLineDash([2,4]); ctx.lineWidth=1.4;
+    ctx.beginPath(); ctx.moveTo(X(m.cap),R.y0); ctx.lineTo(X(m.cap),R.y1); ctx.stroke();
+    ctx.setLineDash([]); ctx.fillStyle=getVar('--text-muted'); ctx.font=FONT; ctx.textAlign='right'; ctx.textBaseline='top';
+    ctx.fillText('Capacidad Q̄', X(m.cap)-5, R.y0+4); ctx.restore();
+  }
+
+  /* --- guías, puntos y rótulos --- */
+  function guide(q, v, color){
+    ctx.save(); ctx.strokeStyle=color; ctx.lineWidth=1.3; ctx.setLineDash([5,4]);
+    ctx.beginPath(); ctx.moveTo(X(q),Y(v)); ctx.lineTo(X(q),Y(Math.max(V.y0,Math.min(0,V.y1)))); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(X(q),Y(v)); ctx.lineTo(X(Math.max(V.x0,Math.min(0,V.x1))),Y(v)); ctx.stroke();
+    ctx.restore();
+  }
+  function dot(q, v, color, r, hollow){
+    ctx.save(); ctx.beginPath(); ctx.arc(X(q),Y(v),r||5,0,Math.PI*2);
+    if (hollow){ ctx.fillStyle=getVar('--surface-1'); ctx.fill(); ctx.strokeStyle=color; ctx.lineWidth=2; ctx.stroke(); }
+    else { ctx.fillStyle=color; ctx.fill(); ctx.strokeStyle=getVar('--surface-1'); ctx.lineWidth=2; ctx.stroke(); }
+    ctx.restore();
+  }
+  function text(str, x, y, color, align, base, bold){
+    ctx.save(); ctx.font=(bold?'600 ':'')+'12px system-ui,-apple-system,sans-serif';
+    ctx.textAlign=align||'left'; ctx.textBaseline=base||'bottom';
+    ctx.lineWidth=3.5; ctx.strokeStyle=getVar('--surface-1'); ctx.lineJoin='round'; ctx.strokeText(str,x,y);
+    ctx.fillStyle=color; ctx.fillText(str,x,y); ctx.restore();
+  }
+  const colComp = getVar('--c-comp'), colMono = getVar('--c-mono'), colMuted = getVar('--text-muted');
+  // Referencia: monopolio sin regular
+  const mo = m.res.none;
+  if (state.curves.mono && mo.produce && state.policy!=='none'){
+    dot(mo.Q, mo.pc, colMuted, 4.5, true);
+    text('M', X(mo.Q)+7, Y(mo.pc)-3, colMuted, 'left', 'bottom', true);
+  }
+  // Primer mejor
+  if (m.Qe>0){
+    dot(m.Qe, m.Pe, colComp, 4.5);
+    text('C  (P = CMg)', X(m.Qe)+8, Y(m.Pe)+5, colComp, 'left', 'top', true);
+  }
+  // Asignación bajo la política seleccionada
+  const polColor = state.policy==='none' ? colMono : colReg;
+  if (o.produce){
+    guide(o.Q, o.pc, polColor);
+    if (state.policy==='unitsub' && o.s>0){
+      ctx.save(); ctx.strokeStyle=colSub; ctx.lineWidth=1.3; ctx.setLineDash([3,3]);
+      ctx.beginPath(); ctx.moveTo(X(o.Q),Y(o.pp)); ctx.lineTo(X(Math.max(V.x0,0)),Y(o.pp)); ctx.stroke(); ctx.restore();
+      dot(o.Q, o.MC, colSub, 4);
+      if (Math.abs(Y(o.MC)-Y(o.pc)) > 22) text('IMg + s = CMg', X(o.Q)+8, Y(o.MC)+4, colSub, 'left', 'top', true);
+    }
+    dot(o.Q, o.pc, polColor, 6);
+    const tag = { none:'M', cap:'R  (precio máximo)', mcsub:'R  (P = CMg)', ac:'R  (P = CMe)', twopart:'R  (P = CMg)', unitsub:'R  (subsidio s)' }[state.policy];
+    if (!(state.policy==='mcsub'||state.policy==='twopart')) text(tag, X(o.Q)+9, Y(o.pc)-5, polColor, 'left', 'bottom', true);
+  }
+
+  // rótulos de áreas
+  function areaLabel(str, q, v){
+    const x=X(q), y=Y(v);
+    if (x<R.x0+12||x>R.x1-12||y<R.y0+10||y>R.y1-10) return;
+    text(str, x, y, getVar('--text-primary'), 'center', 'middle', true);
+  }
+  if (o.produce){
+    const Q=o.Q, pc=o.pc;
+    if (state.areas.cs && Y(pc)-Y(Pd(Q/3)) > 22) areaLabel('EC', Q/4, pc+(Pd(Q/4)-pc)*0.55);
+    if (state.areas.ps && Math.abs(Y(o.pp)-Y(cap(T.mc(Q*0.6))))>18 && o.pp>T.mc(Q*0.6)) areaLabel('EP', Q*0.6, (o.pp+T.mc(Q*0.6))/2);
+    if (state.areas.dwl && Math.abs(X(Q)-X(m.Qe))>26){
+      const qm=(Q+m.Qe)/2; areaLabel('PIE', qm, (Pd(qm)+cap(T.mc(qm)))/2);
+    }
+    if (state.areas.sub && o.S>1e-9){
+      const top = o.s>0 ? o.pp : pc + o.lump/Q;
+      if (Math.abs(Y(top)-Y(pc))>14) areaLabel('Subsidio', Q*0.72, (top+pc)/2);
+    }
+    if (state.areas.fee && o.fee>1e-9 && Math.abs(Y(pc+o.fee/Q)-Y(pc))>14) areaLabel('Cargo fijo', Q*0.72, pc+o.fee/(2*Q));
+  }
+  labels.forEach(([pt,str,cv])=>{
+    const ly = Math.min(Math.max(pt[1], R.y0+10), R.y1-12);
+    const nearRight = pt[0]+6 > R.x1-34;
+    text(str, nearRight ? R.x1-4 : pt[0]+6, nearRight||ly!==pt[1] ? ly-8 : ly, getVar(cv), nearRight?'right':'left', 'middle', true);
+  });
+  ctx.restore();
+
+  // marcas en los ejes
+  function axisTag(str, q, v, color){
+    if (q!==null){ const x=X(q); if (x>=R.x0 && x<=R.x1) text(str, x, R.y1+20, color, 'center', 'top', true); }
+    if (v!==null){ const y=Y(v); if (y>=R.y0 && y<=R.y1) text(str, R.x0-38, y, color, 'right', 'middle', true); }
+  }
+  if (m.Qe>0){ axisTag('Qᶜ', m.Qe, null, colComp); axisTag('Pᶜ', null, m.Pe, colComp); }
+  if (o.produce && Math.abs(o.Q-m.Qe) > (V.x1-V.x0)*0.03){
+    axisTag(state.policy==='none'?'Qᴹ':'Qᴿ', o.Q, null, polColor);
+  }
+  if (o.produce && Math.abs(o.pc-m.Pe) > (V.y1-V.y0)*0.03) axisTag(state.policy==='none'?'Pᴹ':'Pᴿ', null, o.pc, polColor);
+  el('zoomLabel').textContent = Math.round(100*(autoView.x1-autoView.x0)/(V.x1-V.x0))+'%';
+}
+
+/* ============================================================
+   6. LECTURAS, TABLA COMPARATIVA Y NOTAS
+   ============================================================ */
+function item(k, v, color){ return '<div class="item"'+(color?' style="border-left-color:var('+color+')"':'')+'><span class="k">'+k+'</span><span class="v">'+v+'</span></div>'; }
+function sgn(x,d){ return (x===null||!isFinite(x)) ? '—' : fmt(x,d); }
+
+function renderReadouts(){
+  const m = model, o = m.res[state.policy];
+  const pol = POLICIES.find(p=>p.key===state.policy);
+  el('readoutTitle').textContent = 'Resultados: '+pol.label;
+  el('chartTitle').textContent = 'Mercado bajo la política: '+pol.label;
+  const items = [
+    item('Cantidad Q', fmt(o.Q,2), '--c-reg'),
+    item('Precio al consumidor', sgn(o.pc,2), '--c-reg'),
+    item('Precio recibido por la firma', sgn(o.pp,2), '--c-sub'),
+    item('CMe(Q)', sgn(o.AC,2), '--c-ac'),
+    item('CMg(Q)', sgn(o.MC,2), '--c-mc'),
+    item('Exc. del consumidor (neto)', fmt(o.CS,1), '--c-demand'),
+    item('Exc. del productor', fmt(o.PS,1), '--c-mc'),
+    item('Beneficio (π)', fmt(o.profit,1), o.profit>=-1e-9?'--c-profit':'--c-loss'),
+    item('Subsidio (S)', fmt(o.S,1), '--c-sub'),
+    item('Costo de los fondos (λ·S)', fmt(m.lam*o.S,1), '--c-sub'),
+    item('Cargo fijo total', fmt(o.fee,1), '--c-reg'),
+    item('Bienestar neto (W)', fmt(o.W,1)),
+    item('Primer mejor (W*)', fmt(m.Wstar,1), '--c-comp'),
+    item('PIE = W* − W', fmt(o.DWL,1), '--c-comp')
+  ];
+  if (state.policy==='cap') items.splice(3,0, item('Escasez Q<sub>d</sub>(P̄) − Q', fmt(o.shortage||0,2), '--c-reg'));
+  el('readout').innerHTML = items.join('');
+
+  // Tabla comparativa de todas las políticas
+  const Ws = POLICIES.map(p=>m.res[p.key].W);
+  const Wmax = Math.max(...Ws.map(Math.abs), Math.abs(m.Wstar), 1);
+  el('cmpTable').innerHTML = '<thead><tr><th>Política</th><th>Q</th><th>P</th><th>EC</th><th>π</th><th>Subsidio S</th><th>Cargo fijo</th><th>W</th><th>PIE</th><th style="text-align:left">W relativo</th></tr></thead><tbody>'+
+    POLICIES.map(p=>{
+      const r = m.res[p.key];
+      const pct = Math.min(100, Math.abs(r.W)/Wmax*100);
+      return '<tr data-k="'+p.key+'" class="'+(p.key===state.policy?'sel':'')+'"><td>'+p.short+(r.produce?'':' <small>(no opera)</small>')+'</td><td>'+fmt(r.Q,1)+'</td><td>'+sgn(r.pc,1)+'</td><td>'+fmt(r.CS,0)+'</td><td>'+fmt(r.profit,0)+'</td><td>'+fmt(r.S,0)+'</td><td>'+fmt(r.fee,0)+'</td><td>'+fmt(r.W,0)+'</td><td>'+fmt(r.DWL,0)+'</td>'+
+        '<td><div class="bar"><span class="'+(r.W<0?'neg':'')+'" style="width:'+pct+'%"></span></div></td></tr>';
+    }).join('')+
+    '<tr style="cursor:default"><td><i>Primer mejor (referencia)</i></td><td>'+fmt(m.fbProduce?m.Qe:0,1)+'</td><td>'+(m.fbProduce?fmt(m.Pe,1):'—')+'</td><td colspan="4" style="text-align:center;color:var(--text-muted)">P = CMg, pérdida financiada sin distorsión</td><td>'+fmt(m.Wstar,0)+'</td><td>0</td><td><div class="bar"><span style="width:'+Math.min(100,Math.abs(m.Wstar)/Wmax*100)+'%;background:var(--c-comp)"></span></div></td></tr></tbody>';
+  el('cmpTable').querySelectorAll('tbody tr[data-k]').forEach(tr=>tr.addEventListener('click', ()=>selectPolicy(tr.dataset.k)));
+
+  // Ranking
+  const ranked = POLICIES.filter(p=>p.key!=='none').map(p=>({p, W:m.res[p.key].W})).sort((x,y)=>y.W-x.W);
+  const best = ranked[0];
+  let rk = 'Con los parámetros vigentes, la política de mayor bienestar neto es <b>'+best.p.label+'</b> (W = '+fmt(best.W,1)+'; PIE = '+fmt(m.Wstar-best.W,1)+'). ';
+  if (best.p.key==='twopart' && ranked.length>1){
+    const second = ranked[1];
+    rk += 'Ese resultado depende de que el cargo fijo no excluya consumidores; entre las políticas que no requieren ese supuesto, la mejor es <b>'+second.p.label+'</b> (W = '+fmt(second.W,1)+'). ';
+  }
+  if (m.natural) rk += 'El mercado es un <b>monopolio natural</b>: en Qᶜ el precio eficiente Pᶜ = '+fmt(m.Pe,2)+' es menor que CMe(Qᶜ) = '+fmt(m.ACe,2)+', de modo que P = CMg genera una pérdida de '+fmt(-m.profitE,1)+' que debe financiarse. ';
+  else rk += 'No hay monopolio natural en Qᶜ (Pᶜ ≥ CMe), por lo que P = CMg es autofinanciable y no se requiere subsidio. ';
+  if (!m.fbProduce) rk += '<b>Ni siquiera en el primer mejor conviene producir</b>: el excedente bruto no cubre el costo fijo evitable.';
+  el('rankNote').innerHTML = rk;
+  el('rankNote').className = m.natural ? 'note warn' : 'note';
+
+  renderCaseNote();
+}
+
+function renderCaseNote(){
+  const m = model, o = m.res[state.policy], n = el('caseNote');
+  let cls='note', t='';
+  const lam = m.lam;
+  switch(state.policy){
+    case 'none':
+      t = o.produce ? '<b>Monopolio sin regular.</b> IMg = CMg en Q = '+fmt(o.Q,2)+', con P = '+fmt(o.pc,2)+' &gt; CMg = '+fmt(o.MC,2)+'. La PIE ('+fmt(o.DWL,1)+') es la referencia que las políticas buscan reducir.'
+                    : '<b>El monopolista no opera</b>: su beneficio máximo es inferior a la opción de no producir.';
+      break;
+    case 'cap':
+      if (!o.produce){ cls='note flag';
+        t = '<b>La firma no opera con P̄ = '+fmt(state.Pcap,2)+'.</b> El precio máximo no permite cubrir '+(m.horizon==='sr'?'el costo variable':'el costo medio (incluido F, evitable en el largo plazo)')+'. '+
+            (m.natural ? 'En un monopolio natural, fijar P̄ = CMg (= '+fmt(m.Pe,2)+') es inviable sin subsidio: el precio mínimo autofinanciable es P<sup>CMe</sup> = '+sgn(m.Pac,2)+'.' : '');
+      } else if (!o.binding){
+        t = '<b>Precio máximo no restrictivo.</b> P̄ = '+fmt(state.Pcap,2)+' supera el precio que elegiría el monopolista; el resultado coincide con el de monopolio.';
+      } else if (o.shortage>1e-6){
+        cls='note warn';
+        t = '<b>Precio máximo con escasez.</b> A P̄ = '+fmt(state.Pcap,2)+' se demandan Q<sub>d</sub> = '+fmt(o.QdCap,2)+' unidades pero la firma ofrece Q = '+fmt(o.Q,2)+' (donde CMg = P̄): exceso de demanda de '+fmt(o.shortage,2)+'. El EC se calcula bajo racionamiento eficiente; con racionamiento aleatorio la pérdida sería mayor.';
+      } else {
+        cls='note ok';
+        t = '<b>Precio máximo efectivo.</b> El IMg efectivo es horizontal en P̄ hasta Q<sub>d</sub>(P̄) = '+fmt(o.QdCap,2)+'; la firma produce la cantidad demandada a P̄ (Q = '+fmt(o.Q,2)+'). '+
+            (Math.abs(state.Pcap-m.Pe)<0.6 && !m.natural ? 'Con P̄ ≈ Pᶜ se replica la asignación eficiente.' : 'El precio máximo que maximiza el bienestar es '+(m.natural?'el menor autofinanciable, P̄ = P<sup>CMe</sup>.':'P̄ = Pᶜ, donde la demanda corta al CMg.'));
+      }
+      break;
+    case 'mcsub':
+      cls = o.S>0 ? 'note warn' : 'note ok';
+      t = '<b>Tarificación a costo marginal.</b> Se alcanza la cantidad eficiente Qᶜ = '+fmt(o.Q,2)+'. '+
+          (o.S>0 ? 'Como P = '+fmt(o.pc,2)+' &lt; CMe = '+fmt(o.AC,2)+', la pérdida (CMe − P)·Q = '+fmt(o.S,1)+' se cubre con un subsidio de suma fija. Con λ = '+fmt(lam,2)+', su costo social excedente es λ·S = '+fmt(lam*o.S,1)+', que es la única PIE de esta política.'
+                 : 'No hay pérdida que cubrir (P ≥ CMe): el primer mejor es autofinanciable.');
+      break;
+    case 'ac':
+      if (!o.produce){ cls='note flag'; t = '<b>No existe precio autofinanciable.</b> El CMe se ubica por encima de la demanda para toda cantidad: el mercado solo es viable con subsidio.'; }
+      else { cls = o.Q < m.Qe ? 'note warn' : 'note';
+        t = '<b>Tarificación a costo medio (segundo mejor).</b> P = CMe = '+fmt(o.pc,2)+' en Q = '+fmt(o.Q,2)+', con beneficio nulo y sin subsidio. '+
+            (o.Q < m.Qe - 1e-6 ? 'Se produce menos que Qᶜ: la PIE ('+fmt(o.DWL,1)+') es el triángulo entre la demanda y el CMg; es preferible a P = CMg con subsidio si λ·S supera esa pérdida.' :
+             'Sin monopolio natural, P = CMe implica Q ≥ Qᶜ (sobreproducción, CMg &gt; P).'); }
+      break;
+    case 'twopart':
+      if (!o.produce){ cls='note flag'; t='<b>No hay producción eficiente.</b>'; break; }
+      cls = o.feeExceedsCS ? 'note flag' : 'note ok';
+      t = '<b>Tarifa en dos partes.</b> Precio unitario P = CMg = '+fmt(o.pc,2)+' y un cargo fijo total T = '+fmt(o.fee,1)+' que cubre la pérdida sin recurrir al Tesoro: se alcanza el primer mejor (W = W*). '+
+          (o.feeExceedsCS ? '<b>Advertencia:</b> T supera el excedente bruto de los consumidores a P = CMg ('+fmt(m.res.mcsub.CS,1)+'); el supuesto de que nadie abandona el mercado no se sostiene.' :
+           'Supuesto clave: el cargo fijo no excluye consumidores (T ≤ EC a P = CMg = '+fmt(m.res.mcsub.CS,1)+').');
+      break;
+    case 'unitsub':
+      if (!o.produce){ cls='note flag'; t='<b>La firma no opera</b> aun con el subsidio vigente.'; break; }
+      t = '<b>Subsidio por unidad.</b> La firma iguala IMg + s = CMg: con s = '+fmt(o.s,2)+' produce Q = '+fmt(o.Q,2)+' y los consumidores pagan P = '+fmt(o.pc,2)+'. '+
+          'El subsidio s* = b·Qᶜ = '+fmt(m.sStar,2)+' induce la cantidad eficiente, pero transfiere S = s·Q a la firma, que conserva un beneficio de monopolio (π = '+fmt(o.profit,1)+'); con λ &gt; 0 su costo social es λ·S = '+fmt(lam*o.S,1)+'.';
+      cls = Math.abs(o.Q-m.Qe) < 0.01*Math.max(1,m.Qe) ? 'note ok' : 'note';
+      break;
+  }
+  n.className = cls; n.innerHTML = t;
+}
+
+function renderFormulas(){
+  const p = state.params[state.tech];
+  el('prodFormula').innerHTML = '<b>Producción:</b> '+TECHS[state.tech].prod(p);
+  el('costFormula').innerHTML = '<b>Costo:</b> '+model.T.costTxt;
+  el('rtsTag').textContent = model.T.rts;
+  el('demandFormula').innerHTML = '<b>Demanda:</b> P = '+fmt(state.a,0)+' − '+fmt(state.b,2)+'·Q &nbsp;·&nbsp; <b>IMg</b> = '+fmt(state.a,0)+' − '+fmt(2*state.b,2)+'·Q';
+  // Habilitar visualmente solo los instrumentos pertinentes
+  el('instrCap').classList.toggle('off', state.policy!=='cap');
+  el('instrSub').classList.toggle('off', state.policy!=='unitsub');
+  el('instrLam').classList.toggle('off', !(state.policy==='mcsub'||state.policy==='unitsub'));
+  el('capAc').disabled = model.Pac===null;
+}
+
+function renderDerivation(){
+  const m = model;
+  let s = '';
+  s += '<p><b>Criterio de evaluación.</b> El bienestar social neto suma el excedente de los consumidores, el beneficio de la firma y el resultado fiscal, ponderando cada peso de subsidio por (1+λ):</p>';
+  s += '<span class="eq">W = EC + π − (1+λ)·S = ∫₀<sup>Q</sup> P(q) dq − C(Q) − λ·S</span>';
+  s += '<p>El primer mejor maximiza ∫₀<sup>Q</sup>P − C(Q): P(Qᶜ) = CMg(Qᶜ), siempre que el excedente total cubra el costo fijo evitable. En el equilibrio vigente, Qᶜ = '+fmt(m.Qe,3)+', Pᶜ = '+fmt(m.Pe,3)+', W* = '+fmt(m.Wstar,2)+'.</p>';
+  s += '<p><b>1. Precio máximo.</b> Con P ≤ P̄, el ingreso marginal efectivo es discontinuo:</p>';
+  s += '<span class="eq">IMg<sup>ef</sup>(Q) = P̄ si Q &lt; Q<sub>d</sub>(P̄) = (a − P̄)/b;   IMg<sup>ef</sup>(Q) = a − 2bQ si Q &gt; Q<sub>d</sub>(P̄)</span>';
+  s += '<p>Si CMg es creciente, el P̄ óptimo es Pᶜ: la firma se comporta como tomadora de precios y produce Qᶜ. Si P̄ &lt; Pᶜ, ofrece donde CMg = P̄ &lt; Q<sub>d</sub>(P̄) (escasez). En un monopolio natural (CMe decreciente en Qᶜ), P̄ = Pᶜ implica pérdidas: el menor precio máximo viable es P̄ = CMe.</p>';
+  s += '<p><b>2. P = CMg con subsidio.</b> Q = Qᶜ y el Estado transfiere S = [CMe(Qᶜ) − Pᶜ]·Qᶜ. La PIE es exactamente λ·S: el costo de oportunidad de los fondos públicos (Laffont y Tirole).</p>';
+  s += '<p><b>3. P = CMe.</b> Precio de autofinanciamiento (regla de Ramsey-Boiteux para un único producto): mayor Q tal que a − bQ = C(Q)/Q. Evita el subsidio a costa de producir menos que Qᶜ.</p>';
+  s += '<p><b>4. Tarifa en dos partes (Coase, 1946).</b> Precio unitario igual a CMg y un cargo fijo que reparte la pérdida entre los usuarios. Alcanza W* si ningún consumidor abandona el mercado, es decir, si el cargo no supera su excedente.</p>';
+  s += '<p><b>5. Subsidio por unidad.</b> La firma maximiza (P(Q) + s)·Q − C(Q): IMg(Q) + s = CMg(Q). Para inducir Qᶜ:</p>';
+  s += '<span class="eq">s* = CMg(Qᶜ) − IMg(Qᶜ) = P(Qᶜ) − (a − 2bQᶜ) = b·Qᶜ = '+fmt(m.sStar,3)+'</span>';
+  s += '<p>Corrige la subproducción, pero la firma retiene la renta monopólica más el subsidio; con λ &gt; 0 es dominado por P = CMg con subsidio de suma fija.</p>';
+  s += '<p><b>Supuestos.</b> Información completa del regulador sobre costos y demanda; con escasez, racionamiento eficiente; en el corto plazo, el costo fijo r·K̄ + F es hundido (la firma opera si cubre el costo variable); en el largo plazo F es evitable.</p>';
+  el('deriv').innerHTML = s;
+}
+
+/* ============================================================
+   7. LAZO PRINCIPAL
+   ============================================================ */
+function update(){
+  el('Pcap').max = state.a;   // el precio máximo se acota a la ordenada de la demanda
+  if (state.Pcap > state.a) setSlider('Pcap','Pcap',state.a);
+  model = solvePolicies(state.tech, state.params[state.tech], state.w, state.r, state.F, state.a, state.b,
+    { Pcap:state.Pcap, s:state.s, lambda:state.lambda });
+  autoView = computeAutoView(model);
+  renderFormulas();
+  renderReadouts();
+  renderDerivation();
+  draw();
+}
+window.addEventListener('resize', ()=>{ clearTimeout(window._rz); window._rz=setTimeout(draw,100); });
+update();
+
+})();
+</script>
+</body>
+</html>
